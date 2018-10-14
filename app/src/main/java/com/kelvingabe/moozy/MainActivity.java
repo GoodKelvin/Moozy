@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("popularVote", averageVotes[i]);
         intent.putExtra("overview", overviews[i]);
         intent.putExtra("path", eatFoodyImages[i]);
+        intent.putExtra("movieId", movieIds[i]);
         Log.d("Detail posnum", String.valueOf(i));
         intent.putExtra("trailer", trailerIds[i]);
         Log.d("Main Activity","captured trailer for tranfer "+ trailerIds[i]);
