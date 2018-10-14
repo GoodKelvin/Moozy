@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.icu.text.LocaleDisplayNames;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     String[] releaseDates;
     String[] overviews;
     String[] movieIds;
-    String[] trailerIds;
+    String[] trailerIds = new String[100];
     GridView gridview;
     int i = 0;
 
@@ -103,7 +104,9 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("popularVote", averageVotes[i]);
         intent.putExtra("overview", overviews[i]);
         intent.putExtra("path", eatFoodyImages[i]);
+        Log.d("Detail posnum", String.valueOf(i));
         intent.putExtra("trailer", trailerIds[i]);
+        Log.d("Main Activity","captured trailer for tranfer "+ trailerIds[i]);
         startActivity(intent);
     }
 
@@ -287,12 +290,13 @@ public class MainActivity extends AppCompatActivity {
             //country = sys.getString("country");
             JSONArray picPaths = reader.getJSONArray(TRAILER_RESULTS);
             int j = picPaths.length();
-            trailerIds = new String[movieIds.length + 1];
             for (int i = 0; i < picPaths.length(); i++) {
                 JSONObject c = picPaths.getJSONObject(i);
                 String trailer_id = c.getString(TRAILER_KEY);
-                trailerIds[I] = trailer_id;
-                Log.d(LOG_TAG, trailer_id);
+                trailerIds[i] = trailer_id;
+                Log.d(LOG_TAG+" traler", trailer_id);
+                Log.d(LOG_TAG+" tralid", trailerIds[i]);
+                Log.d(LOG_TAG+" posnum", String.valueOf(i));
             }
         } catch (JSONException e) {
             e.printStackTrace();

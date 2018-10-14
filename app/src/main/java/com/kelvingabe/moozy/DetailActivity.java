@@ -29,6 +29,9 @@ public class DetailActivity extends AppCompatActivity {
         title = intent.getStringExtra("title"); releaseDate = intent.getStringExtra("releaseDate");
         popularVote = intent.getStringExtra("popularVote"); overview = intent.getStringExtra("overview");
         path = intent.getStringExtra("path");  trailer = intent.getStringExtra("trailer");
+        if (trailer == null){
+            Log.d("DETAILACTIVITY","NO TRAILER INFO");
+        }
         initializeStuff();
         populateViews();
     }
