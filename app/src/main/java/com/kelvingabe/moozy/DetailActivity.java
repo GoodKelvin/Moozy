@@ -29,11 +29,11 @@ public class DetailActivity extends AppCompatActivity {
     TextView titleTextView;
     TextView overviewTextView;
     TextView popularTextView;
-    TextView releaseDateTextView;
+    TextView releaseDateTextView, movieReviews;
     ImageView moviePosterImageView;
     Button movieTrailerButton;
     String title, releaseDate, popularVote, overview, path, trailer, movieId;
-    String[] trailerIds;
+    String[] trailerIds, authors, contents;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +48,7 @@ public class DetailActivity extends AppCompatActivity {
         }
         try {
             trailerVollley();
+            ReviewVollley();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -57,6 +58,7 @@ public class DetailActivity extends AppCompatActivity {
 
 
     public void initializeStuff(){
+        movieReviews = findViewById(R.id.movie_detail_reviews);
         overviewTextView = (TextView) findViewById(R.id.movie_detail_overview);
         popularTextView = (TextView) findViewById(R.id.movie_detail_popular_vote);
         releaseDateTextView = (TextView) findViewById(R.id.movie_detail_release_date);
@@ -80,6 +82,7 @@ public class DetailActivity extends AppCompatActivity {
                 watchYoutubeVideo(trailerIds[0]);
             }
         });
+
     }
 
     public void watchYoutubeVideo(String id){
@@ -116,13 +119,9 @@ public class DetailActivity extends AppCompatActivity {
                     error.printStackTrace();
                 }
             });
-// Add the request to the RequestQueue.
             queue.add(stringRequest);
-
-
-        // Request a string response from the provided URL.
-
     }
+
     private void parseTrailerJson(String moviesJsonStr) {
         String LOG_TAG = "parseTrailerJson";
 
@@ -151,6 +150,63 @@ public class DetailActivity extends AppCompatActivity {
                 Log.d(LOG_TAG + " traler", trailer_id);
                 Log.d(LOG_TAG + " tralid", trailerIds[i]);
                 Log.d(LOG_TAG + " posnum", String.valueOf(i));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void ReviewVollley() throws MalformedURLException {
+        String baseUrl1 = "http://api.themoviedb.org/3/movie/";
+        String baseUrl2 = "/reviews?api_key=" + BuildConfig.THE_MOVIE_DB_API_KEY;
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        String url = baseUrl1 + movieId.trim() + baseUrl2;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        Log.d("Review", "Response is: " + response);
+                        parseReviewJson(response);
+                        //initializeAdapter();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("Review", "That didn't work!");
+                error.printStackTrace();
+            }
+        });
+        queue.add(stringRequest);
+    }
+
+    private void parseReviewJson(String moviesJsonStr) {
+        String LOG_TAG = "parseReviewJson";
+
+        final String REVIEW_RESULTS = "results";
+        final String REVIEW_AUTHOR = "author";
+        final String REVIEW_ID = "id";
+        final String REVIEW_URL = "url";
+        final String REVIEW_CONTENT = "content";
+
+
+        try {
+            JSONObject reader = new JSONObject(moviesJsonStr);
+            //Log.d("parseJson", reader.getString(TMDB_PAGE));
+            //JSONObject sys  = reader.getJSONObject("sys");
+            //country = sys.getString("country");
+            JSONArray picPaths = reader.getJSONArray(REVIEW_RESULTS);
+            int j = picPaths.length();
+            authors = new String[j];
+            contents = new String[j];
+            for (int i = 0; i < picPaths.length(); i++) {
+                JSONObject c = picPaths.getJSONObject(i);
+                String author = c.getString(REVIEW_AUTHOR);
+                String content = c.getString(REVIEW_CONTENT);
+                authors[i] = author;
+                contents[i] = content;
+                movieReviews.append(authors[i]+contents[i]);
             }
         } catch (JSONException e) {
             e.printStackTrace();
