@@ -4,10 +4,12 @@
 <string-array name="pref_movieSortTypes_entries">
     <item>Most Popular</item>
     <item>Top Rated</item>
+    <item>Favorite Movies</item>
 </string-array>
 
 <string-array name="pref_movieSortTypes_values">
     <item>1</item>
     <item>2</item>
+    <item>3</item>
 </string-array>
 </resources>

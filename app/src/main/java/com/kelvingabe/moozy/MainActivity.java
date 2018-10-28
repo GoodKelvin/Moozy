@@ -54,19 +54,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         PreferenceManager.setDefaultValues(this, R.xml.preference, false);
-
-        Log.e("test", "test");
     }
 
     private void loadData() {
-        if (isOnline()) {
-            try {
-                testVollley();
+        if (sortOrder.equals("3")){
+            Intent intent = new Intent(this, FavoriteMoviesActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        else {
+            if (isOnline()) {
+                try {
+                    testVollley();
 
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -209,7 +213,8 @@ public class MainActivity extends AppCompatActivity {
         String baseUrl;
         if (sortOrder.equals("1")) {
             baseUrl = "http://api.themoviedb.org/3/movie/popular";
-        } else {
+        }
+        else {
             baseUrl = "http://api.themoviedb.org/3/movie/top_rated";
         }
         //  /movie/top_rated

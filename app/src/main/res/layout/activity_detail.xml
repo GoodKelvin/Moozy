@@ -19,7 +19,8 @@
         android:id="@+id/toggleButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="ToggleButton" />
+        android:text="ToggleButton"
+        android:onClick="onFavoriteClicked"/>
 
     <TextView
         android:id="@+id/movie_detail_movie_title"

@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -17,6 +18,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.kelvingabe.moozy.database.MovieDatabase;
+import com.kelvingabe.moozy.database.MovieEntry;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -34,10 +37,14 @@ public class DetailActivity extends AppCompatActivity {
     Button movieTrailerButton;
     String title, releaseDate, popularVote, overview, path, trailer, movieId;
     String[] trailerIds, authors, contents;
+    private ToggleButton toggleButton;
+    private MovieDatabase mDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        mDb = MovieDatabase.getInstance(getApplicationContext());
         Intent intent = getIntent();
         title = intent.getStringExtra("title"); releaseDate = intent.getStringExtra("releaseDate");
         popularVote = intent.getStringExtra("popularVote"); overview = intent.getStringExtra("overview");
@@ -65,6 +72,7 @@ public class DetailActivity extends AppCompatActivity {
         titleTextView = (TextView) findViewById(R.id.movie_detail_movie_title);
         moviePosterImageView = (ImageView) findViewById(R.id.movie_detail_poster);
         movieTrailerButton = (Button) findViewById(R.id.movie_detail_trailer);
+        toggleButton = findViewById(R.id.toggleButton);
     }
 
     public void populateViews(){
@@ -211,5 +219,13 @@ public class DetailActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void onFavoriteClicked(View v){
+        //check state of button
+        //for now just submit in database and view
+        //dont submit if in on mode
+        MovieEntry movieEntry = new MovieEntry(path,"",overview,releaseDate,"",movieId,title,"",title,popularVote,"",trailer,popularVote);
+        mDb.movieDao().insertMovie(movieEntry);
     }
 }

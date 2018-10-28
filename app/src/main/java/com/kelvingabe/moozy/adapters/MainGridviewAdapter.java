@@ -7,10 +7,12 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.kelvingabe.moozy.R;
+import com.kelvingabe.moozy.database.MovieEntry;
 import com.squareup.picasso.Picasso;
 
 import java.io.BufferedReader;
 import java.net.HttpURLConnection;
+import java.util.List;
 
 /**
  * Created by kelvox on 12/3/2016.
@@ -28,6 +30,14 @@ public class MainGridviewAdapter extends BaseAdapter {
     public MainGridviewAdapter(Context c, String[] bg) {
         mContext = c;
         bc = bg;
+    }
+    public MainGridviewAdapter(Context c, List<MovieEntry> list) {
+        mContext = c;
+        bc = new String[list.size()];
+        for (int i = 0; i <list.size() ; i++) {
+            bc[i] = list.get(i).getPoster_path();
+        }
+
     }
 
     public int getCount() {

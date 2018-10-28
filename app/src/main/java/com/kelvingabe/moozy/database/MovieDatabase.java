@@ -10,14 +10,16 @@ import android.util.Log;
 public abstract class MovieDatabase extends RoomDatabase {
     private static final String LOG_TAG = MovieDatabase.class.getSimpleName();
     private static final Object LOCK = new Object();
-    private static final String DATABASE_NAME = "";
+    private static final String DATABASE_NAME = "favoriteMovies";
     private static MovieDatabase sInstance;
 
     public static MovieDatabase getInstance(Context context) {
         if (sInstance == null) {
             synchronized (LOCK) {
                 Log.d(LOG_TAG, "Creating new database instance");
-                sInstance = Room.databaseBuilder(context.getApplicationContext(), MovieDatabase.class, MovieDatabase.DATABASE_NAME).build();
+                sInstance = Room.databaseBuilder(context.getApplicationContext(), MovieDatabase.class, MovieDatabase.DATABASE_NAME)
+                        .allowMainThreadQueries()
+                        .build();
             }
         }
         Log.d(LOG_TAG, "Getting the database instance");
