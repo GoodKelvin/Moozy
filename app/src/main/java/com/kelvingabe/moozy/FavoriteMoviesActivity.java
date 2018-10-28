@@ -1,5 +1,9 @@
 package com.kelvingabe.moozy;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProvider;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -16,8 +20,10 @@ import android.widget.GridView;
 
 import com.kelvingabe.moozy.adapters.MainGridviewAdapter;
 import com.kelvingabe.moozy.database.MovieDatabase;
+import com.kelvingabe.moozy.database.MovieEntry;
 
 import java.net.MalformedURLException;
+import java.util.List;
 
 public class FavoriteMoviesActivity extends AppCompatActivity {
     String sortOrder;
@@ -41,15 +47,20 @@ public class FavoriteMoviesActivity extends AppCompatActivity {
 
     private void initializeAdapter() {
         gridview = (GridView) findViewById(R.id.main_activity_gridview);
-        gridview.setAdapter(new MainGridviewAdapter(this, mDb.movieDao().loadAllMovies()));
-
+        gridview.setBackgroundColor(Color.parseColor("#ffffff"));
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
                 //openDetailedView(position);
             }
         });
-        gridview.setBackgroundColor(Color.parseColor("#ffffff"));
+        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mainViewModel.getMovies().observe(this, new Observer<List<MovieEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<MovieEntry> movieEntries) {
+                gridview.setAdapter(new MainGridviewAdapter(FavoriteMoviesActivity.this, movieEntries));
+            }
+        });
     }
 
     @Override

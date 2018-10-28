@@ -1,5 +1,6 @@
 package com.kelvingabe.moozy.database;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -12,7 +13,7 @@ import java.util.List;
 @Dao
 public interface MovieDao {
     @Query("SELECT * FROM movies")
-    List<MovieEntry> loadAllMovies();
+    LiveData<List<MovieEntry>>loadAllMovies();
 
     @Insert
     void insertMovie(MovieEntry movieEntry);

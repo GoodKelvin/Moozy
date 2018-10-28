@@ -18,7 +18,7 @@ public abstract class MovieDatabase extends RoomDatabase {
             synchronized (LOCK) {
                 Log.d(LOG_TAG, "Creating new database instance");
                 sInstance = Room.databaseBuilder(context.getApplicationContext(), MovieDatabase.class, MovieDatabase.DATABASE_NAME)
-                        .allowMainThreadQueries()
+                        //.allowMainThreadQueries()
                         .build();
             }
         }
