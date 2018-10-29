@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -37,7 +38,7 @@ public class DetailActivity extends AppCompatActivity {
     Button movieTrailerButton;
     String title, releaseDate, popularVote, overview, path, trailer, movieId;
     String[] trailerIds, authors, contents;
-    private ToggleButton toggleButton;
+    private ImageButton favoriteButton;
     private MovieDatabase mDb;
 
     @Override
@@ -72,7 +73,7 @@ public class DetailActivity extends AppCompatActivity {
         titleTextView = (TextView) findViewById(R.id.movie_detail_movie_title);
         moviePosterImageView = (ImageView) findViewById(R.id.movie_detail_poster);
         movieTrailerButton = (Button) findViewById(R.id.movie_detail_trailer);
-        toggleButton = findViewById(R.id.toggleButton);
+        favoriteButton = findViewById(R.id.favoriteButton);
     }
 
     public void populateViews(){
@@ -225,7 +226,13 @@ public class DetailActivity extends AppCompatActivity {
         //check state of button
         //for now just submit in database and view
         //dont submit if in on mode
-        MovieEntry movieEntry = new MovieEntry(path,"",overview,releaseDate,"",movieId,title,"",title,popularVote,"",trailer,popularVote);
-        mDb.movieDao().insertMovie(movieEntry);
+
+        final MovieEntry movieEntry = new MovieEntry(path,"",overview,releaseDate,"",movieId,title,"",title,popularVote,"",trailer,popularVote);
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                mDb.movieDao().insertMovie(movieEntry);
+            }
+        });
     }
 }

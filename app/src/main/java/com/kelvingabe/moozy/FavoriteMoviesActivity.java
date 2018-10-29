@@ -22,13 +22,11 @@ import com.kelvingabe.moozy.adapters.MainGridviewAdapter;
 import com.kelvingabe.moozy.database.MovieDatabase;
 import com.kelvingabe.moozy.database.MovieEntry;
 
-import java.net.MalformedURLException;
 import java.util.List;
 
 public class FavoriteMoviesActivity extends AppCompatActivity {
     String sortOrder;
     GridView gridview;
-    String[] movieImageUrls;
     private MovieDatabase mDb;
 
     @Override
@@ -51,7 +49,7 @@ public class FavoriteMoviesActivity extends AppCompatActivity {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
-                //openDetailedView(position);
+                openDetailedView(position);
             }
         });
         MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
@@ -61,6 +59,20 @@ public class FavoriteMoviesActivity extends AppCompatActivity {
                 gridview.setAdapter(new MainGridviewAdapter(FavoriteMoviesActivity.this, movieEntries));
             }
         });
+    }
+
+    private void openDetailedView(int i) {
+        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        List<MovieEntry> list = mainViewModel.getMovies().getValue();
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra("title", list.get(i).getTitle());
+        intent.putExtra("releaseDate", list.get(i).getRelease_date());
+        intent.putExtra("popularVote", list.get(i).getPopularity());
+        intent.putExtra("overview", list.get(i).getOverview());
+        intent.putExtra("path", list.get(i).getPoster_path());
+        intent.putExtra("movieId", list.get(i).get_id());
+        intent.putExtra("trailer", list.get(i).getVideo());
+        startActivity(intent);
     }
 
     @Override

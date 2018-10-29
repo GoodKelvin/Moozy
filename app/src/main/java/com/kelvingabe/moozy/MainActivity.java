@@ -109,9 +109,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("overview", overviews[i]);
         intent.putExtra("path", eatFoodyImages[i]);
         intent.putExtra("movieId", movieIds[i]);
-        Log.d("Detail posnum", String.valueOf(i));
         intent.putExtra("trailer", trailerIds[i]);
-        Log.d("Main Activity","captured trailer for tranfer "+ trailerIds[i]);
         startActivity(intent);
     }
 
@@ -267,15 +265,11 @@ public class MainActivity extends AppCompatActivity {
                     error.printStackTrace();
                 }
             });
-// Add the request to the RequestQueue.
             queue.add(stringRequest);
         }
 
-        // Request a string response from the provided URL.
-
     }
 
-    //put first id into array
     private void parseTrailerJson(String moviesJsonStr, int I) {
         String LOG_TAG = "parseTrailerJson";
 
@@ -309,7 +303,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-    //pass array to delatil
 
 }
 
