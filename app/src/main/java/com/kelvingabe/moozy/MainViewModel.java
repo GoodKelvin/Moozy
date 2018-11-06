@@ -12,13 +12,17 @@ import java.util.List;
 
 public class MainViewModel extends AndroidViewModel {
     private LiveData<List<MovieEntry>> movies;
+    MovieDatabase movieDatabase;
     public MainViewModel(@NonNull Application application) {
         super(application);
-        MovieDatabase movieDatabase = MovieDatabase.getInstance(getApplication());
+        movieDatabase = MovieDatabase.getInstance(getApplication());
         movies = movieDatabase.movieDao().loadAllMovies();
     }
 
     public LiveData<List<MovieEntry>> getMovies(){
+        if (movies == null) {
+            movies = movieDatabase.movieDao().loadAllMovies();
+        }
         return  movies;
     }
 }

@@ -1,15 +1,16 @@
 package com.kelvingabe.moozy;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.icu.text.LocaleDisplayNames;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -25,18 +26,15 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.kelvingabe.moozy.adapters.MainGridviewAdapter;
+import com.kelvingabe.moozy.database.MovieEntry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     String sortOrder;
@@ -55,6 +53,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         PreferenceManager.setDefaultValues(this, R.xml.preference, false);
+        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mainViewModel.getMovies().observe(this, new Observer<List<MovieEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<MovieEntry> movieEntries) {
+                //gridview.setAdapter(new MainGridviewAdapter(FavoriteMoviesActivity.this, movieEntries));
+            }
+        });
     }
 
     private void loadData() {
@@ -102,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openDetailedView(int i) {
+        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        List<MovieEntry> list = mainViewModel.getMovies().getValue();
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("title", movieTitles[i]);
         intent.putExtra("releaseDate", releaseDates[i]);
@@ -110,6 +117,12 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("path", eatFoodyImages[i]);
         intent.putExtra("movieId", movieIds[i]);
         intent.putExtra("trailer", trailerIds[i]);
+
+        for (int j = 0; j < list.size(); j++) {
+            if (list.get(j).get_id().contains(movieIds[i])) {
+                intent.putExtra("active", true);
+            }
+        }
         startActivity(intent);
     }
 

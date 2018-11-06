@@ -1,9 +1,13 @@
 package com.kelvingabe.moozy;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -11,7 +15,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -28,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.MalformedURLException;
+import java.util.List;
 
 public class DetailActivity extends AppCompatActivity {
     TextView titleTextView;
@@ -40,19 +44,33 @@ public class DetailActivity extends AppCompatActivity {
     String[] trailerIds, authors, contents;
     private ImageButton favoriteButton;
     private MovieDatabase mDb;
+    Boolean active;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         mDb = MovieDatabase.getInstance(getApplicationContext());
+        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mainViewModel.getMovies().observe(this, new Observer<List<MovieEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<MovieEntry> movieEntries) {
+                //gridview.setAdapter(new MainGridviewAdapter(FavoriteMoviesActivity.this, movieEntries));
+            }
+        });
         Intent intent = getIntent();
-        title = intent.getStringExtra("title"); releaseDate = intent.getStringExtra("releaseDate");
-        popularVote = intent.getStringExtra("popularVote"); overview = intent.getStringExtra("overview");
-        path = intent.getStringExtra("path");  trailer = intent.getStringExtra("trailer");
+        title = intent.getStringExtra("title");
+        releaseDate = intent.getStringExtra("releaseDate");
+        popularVote = intent.getStringExtra("popularVote");
+        overview = intent.getStringExtra("overview");
+        path = intent.getStringExtra("path");
+        trailer = intent.getStringExtra("trailer");
         movieId = intent.getStringExtra("movieId");
-        if (trailer == null){
-            Log.d("DETAILACTIVITY","NO TRAILER INFO");
+        active = intent.getBooleanExtra("active", false);
+
+        if (trailer == null) {
+            Log.d("DETAILACTIVITY", "NO TRAILER INFO");
         }
         try {
             trailerVollley();
@@ -64,8 +82,18 @@ public class DetailActivity extends AppCompatActivity {
         populateViews();
     }
 
+    public void activateFavoriteButton() {
 
-    public void initializeStuff(){
+        if (active) {
+            favoriteButton.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), android.R.drawable.btn_star_big_on));
+        } else {
+            favoriteButton.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), android.R.drawable.btn_star_big_off));
+        }
+
+    }
+
+
+    public void initializeStuff() {
         movieReviews = findViewById(R.id.movie_detail_reviews);
         overviewTextView = (TextView) findViewById(R.id.movie_detail_overview);
         popularTextView = (TextView) findViewById(R.id.movie_detail_popular_vote);
@@ -74,11 +102,14 @@ public class DetailActivity extends AppCompatActivity {
         moviePosterImageView = (ImageView) findViewById(R.id.movie_detail_poster);
         movieTrailerButton = (Button) findViewById(R.id.movie_detail_trailer);
         favoriteButton = findViewById(R.id.favoriteButton);
+        //activateFavoriteButton();
     }
 
-    public void populateViews(){
-        titleTextView.setText(title); popularTextView.setText(popularVote+"/10");
-        releaseDateTextView.setText(releaseDate); overviewTextView.setText(overview);
+    public void populateViews() {
+        titleTextView.setText(title);
+        popularTextView.setText(popularVote + "/10");
+        releaseDateTextView.setText(releaseDate);
+        overviewTextView.setText(overview);
         Picasso picasso = Picasso.with(this);
         picasso.setIndicatorsEnabled(true);
         picasso.load(path)
@@ -94,7 +125,7 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    public void watchYoutubeVideo(String id){
+    public void watchYoutubeVideo(String id) {
         Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
         Intent webIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("http://www.youtube.com/watch?v=" + id));
@@ -111,24 +142,24 @@ public class DetailActivity extends AppCompatActivity {
         String baseUrl2 = "/videos?api_key=" + BuildConfig.THE_MOVIE_DB_API_KEY;
         RequestQueue queue = Volley.newRequestQueue(this);
 
-            String url = baseUrl1 + movieId.trim() + baseUrl2;
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            // Display the first 500 characters of the response string.
-                            Log.d("Volley", "Response is: " + response);
-                            parseTrailerJson(response);
-                            //initializeAdapter();
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d("Volley", "That didn't work!");
-                    error.printStackTrace();
-                }
-            });
-            queue.add(stringRequest);
+        String url = baseUrl1 + movieId.trim() + baseUrl2;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        Log.d("Volley", "Response is: " + response);
+                        parseTrailerJson(response);
+                        //initializeAdapter();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("Volley", "That didn't work!");
+                error.printStackTrace();
+            }
+        });
+        queue.add(stringRequest);
     }
 
     private void parseTrailerJson(String moviesJsonStr) {
@@ -215,24 +246,39 @@ public class DetailActivity extends AppCompatActivity {
                 String content = c.getString(REVIEW_CONTENT);
                 authors[i] = author;
                 contents[i] = content;
-                movieReviews.append(authors[i]+contents[i]);
+                movieReviews.append(authors[i] + contents[i]);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    public void onFavoriteClicked(View v){
-        //check state of button
-        //for now just submit in database and view
-        //dont submit if in on mode
+    public void onFavoriteClicked(View v) {
+        final MovieEntry movieEntry = new MovieEntry(path, "", overview, releaseDate, "", movieId, title, "", title, popularVote, "", trailer, popularVote);
+        if (active) {
+            //delete movie
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    mDb.movieDao().deleteById(movieId);
+                }
+            });
+            active = false;
+        } else {
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    mDb.movieDao().insertMovie(movieEntry);
+                }
+            });
+            active = true;
+        }
+        activateFavoriteButton();
+    }
 
-        final MovieEntry movieEntry = new MovieEntry(path,"",overview,releaseDate,"",movieId,title,"",title,popularVote,"",trailer,popularVote);
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                mDb.movieDao().insertMovie(movieEntry);
-            }
-        });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        activateFavoriteButton();
     }
 }
