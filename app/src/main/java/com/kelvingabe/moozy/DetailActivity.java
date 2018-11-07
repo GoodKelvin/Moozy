@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -30,7 +31,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.MalformedURLException;
 import java.util.List;
 
 public class DetailActivity extends AppCompatActivity {
@@ -39,7 +39,6 @@ public class DetailActivity extends AppCompatActivity {
     TextView popularTextView;
     TextView releaseDateTextView, movieReviews;
     ImageView moviePosterImageView;
-    Button movieTrailerButton;
     String title, releaseDate, popularVote, overview, path, trailer, movieId;
     String[] trailerIds, authors, contents;
     private ImageButton favoriteButton;
@@ -75,7 +74,7 @@ public class DetailActivity extends AppCompatActivity {
         try {
             trailerVollley();
             ReviewVollley();
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         initializeStuff();
@@ -95,14 +94,13 @@ public class DetailActivity extends AppCompatActivity {
 
     public void initializeStuff() {
         movieReviews = findViewById(R.id.movie_detail_reviews);
-        overviewTextView = (TextView) findViewById(R.id.movie_detail_overview);
-        popularTextView = (TextView) findViewById(R.id.movie_detail_popular_vote);
-        releaseDateTextView = (TextView) findViewById(R.id.movie_detail_release_date);
-        titleTextView = (TextView) findViewById(R.id.movie_detail_movie_title);
-        moviePosterImageView = (ImageView) findViewById(R.id.movie_detail_poster);
-        movieTrailerButton = (Button) findViewById(R.id.movie_detail_trailer);
+        overviewTextView = findViewById(R.id.movie_detail_overview);
+        popularTextView = findViewById(R.id.movie_detail_popular_vote);
+        releaseDateTextView = findViewById(R.id.movie_detail_release_date);
+        titleTextView = findViewById(R.id.movie_detail_movie_title);
+        moviePosterImageView = findViewById(R.id.movie_detail_poster);
         favoriteButton = findViewById(R.id.favoriteButton);
-        //activateFavoriteButton();
+
     }
 
     public void populateViews() {
@@ -116,12 +114,6 @@ public class DetailActivity extends AppCompatActivity {
                 .placeholder(getDrawable(R.mipmap.image_placeholder))
                 .error(getDrawable(R.mipmap.image_placeholder))
                 .into(moviePosterImageView);
-        movieTrailerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                watchYoutubeVideo(trailerIds[0]);
-            }
-        });
 
     }
 
@@ -137,7 +129,7 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
-    public void trailerVollley() throws MalformedURLException {
+    public void trailerVollley() {
         String baseUrl1 = "http://api.themoviedb.org/3/movie/";
         String baseUrl2 = "/videos?api_key=" + BuildConfig.THE_MOVIE_DB_API_KEY;
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -194,9 +186,10 @@ public class DetailActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        trailerButtons();
     }
 
-    public void ReviewVollley() throws MalformedURLException {
+    public void ReviewVollley() {
         String baseUrl1 = "http://api.themoviedb.org/3/movie/";
         String baseUrl2 = "/reviews?api_key=" + BuildConfig.THE_MOVIE_DB_API_KEY;
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -246,7 +239,7 @@ public class DetailActivity extends AppCompatActivity {
                 String content = c.getString(REVIEW_CONTENT);
                 authors[i] = author;
                 contents[i] = content;
-                movieReviews.append(authors[i] + contents[i]);
+                movieReviews.append("\n" + "\n" + authors[i] + "\n" + contents[i]);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -280,5 +273,29 @@ public class DetailActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         activateFavoriteButton();
+    }
+
+    protected void trailerButtons() {
+        LinearLayout l_layout = findViewById(R.id.trailerLayout);
+        l_layout.removeAllViewsInLayout();
+        int k = 0;
+        for (int i = 0; i < trailerIds.length; i++) {
+            Button btn = new Button(this);
+            btn.setText("Trailer " + String.valueOf(i + 1));
+
+            btn.setId(i);
+
+
+            l_layout.addView(btn);
+            k = i;
+
+            final int finalK = k;
+            btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    watchYoutubeVideo(trailerIds[finalK]);
+                }
+            });
+        }
     }
 }

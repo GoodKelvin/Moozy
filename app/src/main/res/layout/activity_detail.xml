@@ -12,8 +12,7 @@
     android:id="@+id/activity_detail"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
 
     <ImageButton
         android:id="@+id/favoriteButton"
@@ -27,8 +26,7 @@
     <TextView
         android:id="@+id/movie_detail_movie_title"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="100dp"
         android:text="@string/sample_chappie"
         android:textColor="@android:color/white"
         android:background="@android:color/holo_blue_dark"
@@ -37,8 +35,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2">
+        android:layout_height="180dp">
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -82,19 +79,29 @@
     <TextView
         android:id="@+id/movie_detail_overview"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:textColor="@android:color/white"
         android:text="@string/lorem_ipsum"/>
-    <Button
-        android:id="@+id/movie_detail_trailer"
+
+    <LinearLayout
+        android:id="@+id/trailerLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/movie_detail_trailer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
     <TextView
         android:id="@+id/movie_detail_reviews"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
         android:text="Reviews"/>
+
 </LinearLayout>
+
 
 </ScrollView>
