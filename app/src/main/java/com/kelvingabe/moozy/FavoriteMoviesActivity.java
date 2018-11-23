@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,10 @@ public class FavoriteMoviesActivity extends AppCompatActivity {
     String sortOrder;
     GridView gridview;
     private MovieDatabase mDb;
+    List<MovieEntry> list;
+    MainViewModel mainViewModel;
+    int index = 0;
+    static final String SCROLL_POS = "scroll";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -35,6 +40,19 @@ public class FavoriteMoviesActivity extends AppCompatActivity {
         mDb = MovieDatabase.getInstance(getApplicationContext());
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        outState.putInt(SCROLL_POS, gridview.getFirstVisiblePosition());
+        outPersistentState.putInt(SCROLL_POS, gridview.getFirstVisiblePosition());
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        index = savedInstanceState.getInt(SCROLL_POS);
+    }
+
     private void readPrefs() {
         SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         sortOrder = SP.getString(getString(R.string.pref_movieSortType), "1");
@@ -42,7 +60,7 @@ public class FavoriteMoviesActivity extends AppCompatActivity {
     }
 
     private void initializeAdapter() {
-        gridview = (GridView) findViewById(R.id.main_activity_gridview);
+        gridview = findViewById(R.id.main_activity_gridview);
         gridview.setBackgroundColor(Color.parseColor("#ffffff"));
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
@@ -50,18 +68,17 @@ public class FavoriteMoviesActivity extends AppCompatActivity {
                 openDetailedView(position);
             }
         });
-        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         mainViewModel.getMovies().observe(this, new Observer<List<MovieEntry>>() {
             @Override
             public void onChanged(@Nullable List<MovieEntry> movieEntries) {
                 gridview.setAdapter(new MainGridviewAdapter(FavoriteMoviesActivity.this, movieEntries));
+                list = mainViewModel.getMovies().getValue();
             }
         });
     }
 
     private void openDetailedView(int i) {
-        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        List<MovieEntry> list = mainViewModel.getMovies().getValue();
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("title", list.get(i).getTitle());
         intent.putExtra("releaseDate", list.get(i).getRelease_date());
@@ -79,6 +96,9 @@ public class FavoriteMoviesActivity extends AppCompatActivity {
         super.onResume();
         readPrefs();
         loadData();
+        if (index != 0) {
+            gridview.smoothScrollToPosition(index);
+        }
     }
 
     @Override

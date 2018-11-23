@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +38,7 @@ import java.net.URL;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    static final String SCROLL_POS = "scroll";
     String sortOrder;
     String[] eatFoodyImages;
     String[] averageVotes;
@@ -47,17 +49,37 @@ public class MainActivity extends AppCompatActivity {
     String[] trailerIds = new String[100];
     GridView gridview;
     int i = 0;
+    MainViewModel mainViewModel;
+    List<MovieEntry> list;
+    int index = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         PreferenceManager.setDefaultValues(this, R.xml.preference, false);
-        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        outState.putInt(SCROLL_POS, gridview.getFirstVisiblePosition());
+        outPersistentState.putInt(SCROLL_POS, gridview.getFirstVisiblePosition());
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        index = savedInstanceState.getInt(SCROLL_POS);
+    }
+
+    private void setupViewModel() {
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         mainViewModel.getMovies().observe(this, new Observer<List<MovieEntry>>() {
             @Override
             public void onChanged(@Nullable List<MovieEntry> movieEntries) {
-                //gridview.setAdapter(new MainGridviewAdapter(FavoriteMoviesActivity.this, movieEntries));
+                list = mainViewModel.getMovies().getValue();
             }
         });
     }
@@ -91,10 +113,14 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         readPrefs();
         loadData();
+        setupViewModel();
+        if (index != 0) {
+            gridview.smoothScrollToPosition(index);
+        }
     }
 
     private void initializeAdapter() {
-        gridview = (GridView) findViewById(R.id.main_activity_gridview);
+        gridview = findViewById(R.id.main_activity_gridview);
         gridview.setAdapter(new MainGridviewAdapter(this, eatFoodyImages));
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -107,8 +133,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openDetailedView(int i) {
-        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        List<MovieEntry> list = mainViewModel.getMovies().getValue();
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra("title", movieTitles[i]);
         intent.putExtra("releaseDate", releaseDates[i]);
@@ -135,9 +159,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -208,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         }
         try {
             trailerVollley();
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -256,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void trailerVollley() throws MalformedURLException {
+    public void trailerVollley() {
         String baseUrl1 = "http://api.themoviedb.org/3/movie/";
         String baseUrl2 = "/videos?api_key=" + BuildConfig.THE_MOVIE_DB_API_KEY;
         RequestQueue queue = Volley.newRequestQueue(this);
