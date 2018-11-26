@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         PreferenceManager.setDefaultValues(this, R.xml.preference, false);
-
+        gridview = findViewById(R.id.main_activity_gridview);
     }
 
     @Override
@@ -80,15 +80,47 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(@Nullable List<MovieEntry> movieEntries) {
                 list = mainViewModel.getMovies().getValue();
+                if (sortOrder.equals("3")) {
+                    gridview.setAdapter(new MainGridviewAdapter(MainActivity.this, movieEntries));
+                    onFavoriteMovies();
+                }
+            }
+        });
+    }
+
+    private void onFavoriteMovies() {
+        /*mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mainViewModel.getMovies().observe(this, new Observer<List<MovieEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<MovieEntry> movieEntries) {
+                gridview.setAdapter(new MainGridviewAdapter(MainActivity.this, movieEntries));
+
+            }
+        });*/
+        gridview.setBackgroundColor(Color.parseColor("#ffffff"));
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                intent.putExtra("title", list.get(i).getTitle());
+                intent.putExtra("releaseDate", list.get(i).getRelease_date());
+                intent.putExtra("popularVote", list.get(i).getPopularity());
+                intent.putExtra("overview", list.get(i).getOverview());
+                intent.putExtra("path", list.get(i).getPoster_path());
+                intent.putExtra("movieId", list.get(i).get_id());
+                intent.putExtra("trailer", list.get(i).getVideo());
+                intent.putExtra("active", true);
+                startActivity(intent);
             }
         });
     }
 
     private void loadData() {
         if (sortOrder.equals("3")){
-            Intent intent = new Intent(this, FavoriteMoviesActivity.class);
+            /*Intent intent = new Intent(this, FavoriteMoviesActivity.class);
             startActivity(intent);
-            finish();
+            finish();*/
+            //onFavoriteMovies();
         }
         else {
             if (isOnline()) {
@@ -105,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
     private void readPrefs() {
         SharedPreferences SP = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         sortOrder = SP.getString(getString(R.string.pref_movieSortType), "1");
-        Log.d("prefs", sortOrder);
     }
 
     @Override
@@ -120,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeAdapter() {
-        gridview = findViewById(R.id.main_activity_gridview);
         gridview.setAdapter(new MainGridviewAdapter(this, eatFoodyImages));
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
